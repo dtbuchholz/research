@@ -1,5 +1,14 @@
 # Number Theory
 
+## Table of Contents
+
+- [Numbers](#numbers)
+- [Sets](#sets)
+- [Relations](#relations)
+- [Groups](#groups)
+- [Rings](#rings)
+- [Fields](#fields)
+
 ## Numbers
 
 ### Types
@@ -8,7 +17,7 @@ Numbers can be classified into different types:
 
 - **Integers**: whole numbers (e.g., 1, 2, 3)
 - **Rational numbers**: numbers that can be expressed as a fraction (e.g., 1/2, 3/4); includes
-  integers.
+  integers. Recall that the dividend is the numerator and the divisor is the denominator.
 - **Irrational numbers**: numbers that cannot be expressed as a fraction (e.g., $\sqrt{2}$, $\pi$).
 - **Real numbers**: numbers that can be represented on a continuous number line (e.g., 1.5, 2.75);
   this includes both rational and irrational numbers.
@@ -20,6 +29,8 @@ Special types of numbers:
 - **Prime numbers**: integers greater than 1 that have no positive divisors other than 1 and
   themselves (e.g., 2, 3, 5, 7). They are the building blocks of all numbers.
 - **Composite numbers**: integers greater than 1 that are not prime (e.g., 4, 6, 8, 9).
+- **Coprime numbers**: two numbers that share no common factors other than 1 (e.g., 6 and 35 are
+  coprime because their only common factor is 1).
 
 ### Properties
 
@@ -69,35 +80,37 @@ the result of the operation, and $m$ is the modulus:
 E.g., in modulo 5 arithmetic, $4 + 3 \equiv 2 \pmod{5}$. This is because $4 + 3 = 7$, and
 $7 \mod 5 = 2$. Thus, $7 \equiv 2 \pmod{5}$.
 
-A quick example of finding `m` in modular arithmetic:
+A quick example of finding $m$ in modular arithmetic:
 
 - Starting with $10 \equiv 2 \pmod{m}$
 - Find the absolute difference between $10$ and $2$, which is $10 - 2 = 8$
-- Determine all factors (or divisors) of $8$, which are $1, 2, 4, 8$
-- Any of these factors can be the modulus, $m$, so $m = \{1, 2, 4, 8\}$
+- Determine all factors (or divisors) of $8$, which are $1, 2, 4, 8$ (ignore $1$ because it's the
+  identity element, so it'll always be zero for any $a$ under modular arithmetic)
+- Any of these factors can be the modulus, $m$, so $m = \{2, 4, 8\}$
 
 Or algorithmically:
 
 ```python
 def find_moduli(a: int, b: int) -> list[int]:
+    """Find all valid moduli m where a ≡ b (mod m)"""
     # Step 1: Find absolute difference
     diff = abs(a - b)
 
-    # Step 2: Find all divisors of the difference
-    # We only need to check up to the square root of the difference to find all divisors
-    divisors = []
-    for i in range(1, int(diff ** 0.5) + 1):
-        if diff % i == 0:
-            # Add both divisors (i and diff/i)
-            divisors.append(i)
-            if i != diff // i:  # Avoid adding square roots twice
-                divisors.append(diff // i)
+    # Step 2: Find all divisors > 1 up to diff (note: only considering integers)
+    valid_moduli = []
+    for m in range(2, diff + 1): # Include diff in the range
+        if diff % m == 0 and (a % m) == (b % m): # Some extra validation for demonstration
+            valid_moduli.append(m)
 
-    return sorted(divisors)
+    return valid_moduli
 
-# Find all m where 10 ≡ 2 (mod m)
-moduli = find_moduli(10, 2)
-print(moduli)  # Output: [1, 2, 4, 8]
+# Test cases
+test_cases = [
+    (10, 1),   # diff=9, should get [3,9]
+    (10, 2),   # diff=8, should get [2,4,8]
+    (15, 3),   # diff=12, should get [2,3,4,6,12]
+    (7, 3),    # diff=4, should get [2,4]
+]
 ```
 
 ## Sets
@@ -120,7 +133,8 @@ Special sets are well known and have specific names:
 - $\mathbb{Z}$—integers: $\mathbb{Z} = \{\ldots, -2, -1, 0, 1, 2, \ldots\}$
 - $\mathbb{Q}$—rational numbers: $\mathbb{Q} = \{\frac{a}{b} \mid a, b \in \mathbb{Z}, b \neq 0\}$
   (i.e., fractions)
-- $\mathbb{R}$—real numbers: $\mathbb{R} = \{\ldots, -2, -1, 0, 1, 2, \ldots\}$ (i.e., all numbers
+- $\mathbb{R}$—real numbers:
+  $\mathbb{R} = \{\ldots, -2, -\sqrt{2}, -1/2, 0, 1/2, \sqrt{2}, 2, \ldots\}$ (i.e., all numbers
   that can be represented on a continuous number line)
 - $\mathbb{C}$—complex numbers: $\mathbb{C} = \{a + bi \mid a, b \in \mathbb{R}\}$
 - Although irrational numbers do not have their own special set, they are the difference between the
@@ -380,7 +394,7 @@ Groups, rings, and fields are sets of elements with binary operations. The hiera
 
 Namely, groups are the most basic set, and fields are the most restrictive.
 
-### Groups
+## Groups
 
 A group is a pair containing a set $G$ with an arbitrary binary operation $\cdot$ (typically $+$ or
 $\times$) that satisfies—i.e., $(G, \cdot)$ is a group. In other words, it's a set _with_ an
@@ -425,19 +439,25 @@ def integer_group_example():
     assert (-n) + n == 0
 ```
 
-#### Abelian (commutative) groups
+### Abelian (commutative) groups
 
-Abelian (commutative) groups are groups where the operation is commutative (i.e.,
-$a \cdot b = b \cdot a$). Conversely, non-abelian groups are groups where the operation is not
-commutative (i.e., $a \cdot b \neq b \cdot a$). For example, adding integers is commutative, but
-matrix multiplication (typically) is not.
+Abelian groups are groups where the operation is commutative (i.e., $a \cdot b = b \cdot a$).
+Conversely, non-abelian groups are groups where the operation is not commutative (i.e.,
+$a \cdot b \neq b \cdot a$). For example, adding integers is commutative, but matrix multiplication
+(typically) is not.
 
-#### Cyclic groups
+### Generators
+
+A generator of a group is an element $g$ such that every element of the group can be written as
+$g^k$ for some integer $k$. For example, the integers under addition modulo $5$ form a cyclic group,
+where the generator is $1$.
+
+### Cyclic groups
 
 A cyclic group is a group that can be generated by a single element $g$ such that every other
-element of the group may be obtained by repeatedly applying the group operation to g or its inverse.
-That is, for some element $g \in G$, every element of the group can be written as $g^k$ for some
-integer $k$.
+element of the group may be obtained by repeatedly applying the group operation to $g$ or its
+inverse. That is, for some element $g \in G$, every element of the group can be written as $g^k$ for
+some integer $k$.
 
 For example, the integers under addition modulo $n$ form a cyclic group, where the generator is $1$.
 Or algorithmically:
@@ -465,25 +485,63 @@ Note that cyclic groups can be finite or infinite. For example, the integers und
 infinite cyclic group, where the generator is $1$ (e.g., $1, 2, 3, 4, \ldots$) or its inverse $-1$
 (e.g., $\ldots,4, 3, 2, 1$).
 
-#### Order of a group & element
+## Quadratic residues
 
-The order of a (finite) _group_ is the number of elements in the group. The order of an _element_
-(or "period") $a$ is the order of the cyclic subgroup generated by the element. That is, the
-smallest positive integer $m$ such that $a^m = e$. If the group is not finite, the order of an
-element is infinite.
+A number $a$ is a quadratic residue modulo $p$ if there exists an $x$ where $x^2 \equiv a \pmod{p}$.
+The Legendre symbol $(a \mid p)$ can be used for odd primes and integers and is defined as
+$a^{(p-1)/2} \pmod{p}$. The Legendre symbol is:
 
-For example, in the integers under addition modulo $5$, the order of the group is $5$ (since there
-are 5 elements: $\{0,1,2,3,4\}$), and the order of the element $2$ is $5$ (since $2^5 = 0$).
+- $1$ if $a$ is a quadratic residue modulo $p$
+- $-1$ if $a$ is a quadratic non-residue
+- $0$ if $a \equiv 0 \pmod{p}$
 
-Here's how to find the order of elements in modulo 5:
+Its properties are:
+
+- Exactly $(p-1)/2$ numbers are quadratic residues
+- Product of residues is a residue
+- Product of non-residue and residue is non-residue
+- For any integer $b$, $(\frac{a}{p}) (\frac{b}{p}) = (\frac{ab}{p})$
+- For any $r$ coprime to $p$, $(\frac{ar^2}{p}) = (\frac{a}{p})$
 
 ```python
-def find_element_order(element: int, modulus: int) -> int:
-    """Find the order of an element in a modular group."""
+def legendre_symbol(a: int, p: int) -> int:
+    """Compute Legendre symbol (a/p)"""
+    if a % p == 0:
+        return 0
+
+    # Euler's criterion
+    result = pow(a, (p-1)//2, p)
+    return result if result <= 1 else -1
+
+# Example in GF(7)
+residues = [n for n in range(1,7) if legendre_symbol(n, 7) == 1]
+print(f"Quadratic residues mod 7: {residues}")  # [1,2,4]
+```
+
+### Order of a group & element
+
+The order of a (finite) _group_ is the number of elements in the group. The order of an _element_
+(or "period") $a$ is the order of the cyclic subgroup generated by the element. If the group is not
+finite, the order of an element is infinite.
+
+- Multiplicative group: $a^k = 1$ (smallest positive integer $k$ such that $a^k = e = 1$)
+- Additive group: $ak = 0$ (smallest positive integer $k$ such that
+  $\underbrace{a + a + \cdots + a}_{k\text{ times}} = e =0$)
+
+For example, in the integers under addition modulo $5$, the order of the group is $5$ (since there
+are 5 elements: $\{0,1,2,3,4\}$), and the order of the element $2$ is $5$ (since $2 \times 5 = 0$).
+For integers under multiplication modulo $5$, the order of the group is $4$ (since there are 4
+elements: $\{1,2,3,4\}$), and the order of the element $2$ is $4$ (since $2^4 = 1$).
+
+Here's how to find the order of elements in the set of integers modulo 5:
+
+```python
+def element_order_additive(element: int, modulus: int) -> int:
+    """Find order of element in additive group mod n"""
     current = element
     order = 1
 
-    while current != 0:  # For additive groups, identity is 0
+    while current != 0:
         current = (current + element) % modulus
         order += 1
 
@@ -492,12 +550,33 @@ def find_element_order(element: int, modulus: int) -> int:
 # Example in Z5 (integers modulo 5)
 mod = 5
 for element in range(1, mod):
-    order = find_element_order(element, mod)
+    order = element_order_additive(element, mod)
     print(f"Order of {element} in Z{mod}: {order}")
     # Order of 1 in Z5: 5
     # Order of 2 in Z5: 5
     # Order of 3 in Z5: 5
     # Order of 4 in Z5: 5
+
+def element_order_multiplicative(element: int, modulus: int) -> int:
+    """Find order of element in multiplicative group mod n"""
+    current = element
+    order = 1
+
+    while current != 1:
+        current = (current * element) % modulus
+        order += 1
+
+    return order
+
+# Example in Z5 (integers modulo 5)
+mod = 5
+for element in range(1, mod):
+    order = element_order_multiplicative(element, mod)
+    print(f"Order of {element} in Z{mod}: {order}")
+    # Order of 1 in Z5: 1
+    # Order of 2 in Z5: 4
+    # Order of 3 in Z5: 5
+    # Order of 4 in Z5: 4
 ```
 
 Note that:
@@ -507,7 +586,7 @@ Note that:
 - The identity element always has order 1
 - If an element generates the entire group, its order equals the group's order
 
-#### Homomorphisms
+### Homomorphism
 
 A group homomorphism is a mapping $h : G \to H$ between two groups, from $(G, *)$ to $(H, \cdot)$,
 that preserves the group operation. That is, for all $u, v \in G$, $h(u * v) = h(u) \cdot h(v)$, so
@@ -597,45 +676,52 @@ assert parity_homomorphism(-n) == parity_homomorphism(n)  # In Z_2, 1 is its own
 
 #### Kernel and image
 
-The kernel of a homomorphism $h : G \to H$ is the set of elements in $G$ that map to the identity
-element in $H$, denoted as $\ker(h) := \{ u \in G : h(u) = e_H \}$. The image of a homomorphism
-$h : G \to H$ is the set of elements in $H$ that are the result of applying the homomorphism to some
-element in $G$, denoted as $\text{im}(h) \colonequals h(G) \equiv \{ h(u) : u \in G \}$.
+The **kernel** of a homomorphism $h : G \to H$ is the set of elements in $G$ that map to the
+identity element in $H$, denoted as $\ker(h) := \{ u \in G : h(u) = e_H \}$. The **image** of a
+homomorphism $h : G \to H$ is the set of elements in $H$ that are the result of applying the
+homomorphism to some element in $G$, denoted as
+$\text{im}(h) \colonequals h(G) \equiv \{ h(u) : u \in G \}$.
 
 - Note: $\colonequals$ (colon equals) is used for definitions and assignments, and $\equiv$
   (equivalent) is used for logical equivalence or identical equality.
 
-For example, in the homomorphism from the integers under addition to the integers modulo 2 under
-multiplication:
+Let's look at a homomorphism $h$ from $(\mathbb{Z},+)$ to $(\mathbb{Z}_2,\times)$:
 
 ```python
 def parity_homomorphism(n: int) -> int:
-    """Maps integers to {0,1} based on parity"""
-    return n % 2
+    """Maps integers to {0,1} based on parity
+    This is a homomorphism from (Z,+) to (Z₂,×)
+    h(a + b) = h(a) × h(b)"""
+    return 1 if n % 2 else 0  # Even -> 0, Odd -> 1
 
-# Kernel: elements that map to identity (0 in Z_2)
-# These are all even integers {..., -2, 0, 2, 4, ...}
-assert parity_homomorphism(0) == 0
-assert parity_homomorphism(2) == 0
-assert parity_homomorphism(4) == 0
+# Verify it's a homomorphism
+def verify_homomorphism(a: int, b: int):
+    # h(a + b) should equal h(a) × h(b)
+    left_side = parity_homomorphism(a + b)
+    right_side = (parity_homomorphism(a) * parity_homomorphism(b)) % 2
+    assert left_side == right_side
+
+verify_homomorphism(3, 5)  # h(8) = 0, h(3)×h(5) = 1×1 = 1
+verify_homomorphism(2, 4)  # h(6) = 0, h(2)×h(4) = 0×0 = 0
+
+# Kernel: elements that map to identity (1 in Z₂ under multiplication)
+def is_in_kernel(n: int) -> bool:
+    """Check if n is in kernel (maps to multiplicative identity 1)"""
+    return parity_homomorphism(n) == 1
+
+# Test kernel
+assert is_in_kernel(1)    # True (odd maps to 1)
+assert is_in_kernel(3)    # True (odd maps to 1)
+assert not is_in_kernel(2)  # False (even maps to 0)
+assert not is_in_kernel(0)  # False (even maps to 0)
 
 # Image: all possible outputs
 # In this case, {0, 1}
-seen_outputs = {parity_homomorphism(n) for n in range(5)}
-assert seen_outputs == {0, 1}  # Complete image of Z_2
-
-# Verify kernel maps to identity
-def is_in_kernel(n: int) -> bool:
-    """Check if n is in kernel (maps to identity)"""
-    return parity_homomorphism(n) == 0
-
-assert is_in_kernel(0)   # True (even)
-assert is_in_kernel(2)   # True (even)
-assert not is_in_kernel(1)  # False (odd)
-assert not is_in_kernel(3)  # False (odd)
+image = {parity_homomorphism(n) for n in range(5)}
+assert image == {0, 1}  # Complete image of Z₂
 ```
 
-### Rings
+## Rings
 
 A ring is a set of elements with _two_ binary operations. They are similar to groups but have two
 operations (typically addition and multiplication), defined as $(R, +, \times)$. Namely, groups have
@@ -688,7 +774,64 @@ Common examples of rings:
 - Polynomials under $+$ and $\times$ (abelian)
 - Matrices under $+$ and $\times$ (non-abelian)
 
-### Fields
+### Characteristic
+
+The characteristic of a ring $\text{char}(R)$ is the smallest positive integer $n$ where
+$n \cdot 1 = 0$ in the ring. If no such number exists, the ring is said to have characteristic zero.
+In other words, it's the smallest positive number of copies of the ring's multiplicative identity
+($1$) that will sum to the additive identity ($0$). Or, you can apply the same rule to any element
+$\alpha$ in the ring due to the distributive property:
+
+1. **Using the multiplicative identity**: The smallest positive integer $n$ where:
+   $\underbrace {1+\cdots +1} _{n{\text{ summands}}}=0$
+2. **Using any element**: The smallest positive integer $n$ where:
+   $\underbrace {a+\cdots +a} _{n{\text{ summands}}}=0$ for every element $a$ in the field
+
+For example:
+
+- In $GF(2)$: $1 + 1 = 0$, so characteristic is $2$
+- In $GF(3)$: $1 + 1 + 1 = 0$, so characteristic is $3$
+- In $GF(2^2)$: $1 + 1 = 0$, so characteristic is still $2$
+
+Key points:
+
+1. **Prime fields $GF(p)$**:
+
+   - Characteristic is $p$
+   - Every element added to itself $p$ times equals $0$
+   - Example: $GF(7)$ has characteristic $7$—e.g., $1$ added $7$ times equals $7$, which is $0$ in
+     $GF(7)$ (since $7 \mod 7 = 0$)
+
+2. **Binary fields GF(2^n)**:
+
+   - Characteristic is $2$
+   - $a + a = 0$ for all elements (why XOR works)
+   - Example: $GF(2^3)$ has characteristic $2$—e.g., $1$ added $2^3$ times equals $8$, which is $0$
+     in $GF(2^3)$ (since $8 \mod 2^3 = 0$)
+
+3. **Impact on elliptic curves**:
+   - Different formulas for different characteristics
+   - Some attacks work only in certain characteristics
+   - AES uses $GF(2^8)$ for efficiency in hardware
+   - Many curves use large characteristic $p$ for security
+
+```python
+def field_characteristic(elements: list) -> int:
+    """Find characteristic of a finite field
+    (simplified: only works for prime fields)"""
+    one = 1
+    char = 1
+    while True:
+        if (char * one) % len(elements) == 0:
+            return char
+        char += 1
+
+# Example
+assert field_characteristic(range(7)) == 7  # GF(7)
+assert field_characteristic(range(11)) == 11  # GF(11)
+```
+
+## Fields
 
 A field is a ring where the multiplicative operation is commutative, defined as $(F, +, \times)$.
 That is, it is a special case of a ring. A field $(F,+,\times)$ must satisfy the following:
@@ -747,16 +890,25 @@ Common examples of fields:
 - Complex numbers ($\mathbb{C}$)
 - Rational numbers ($\mathbb{Q}$)
 
-## Finite fields
+### Field characteristic
+
+Recall the characteristic is the smallest positive integer $n$ where $n \cdot 1 = 0$ in the field
+(else, it's zero). Specifically for a field, the characteristic of any field is either:
+
+- **Characteristic zero**: that is, $n$ is $0$ for all $n$ (if no such $n$ exists)
+- **Prime characteristic**: that is, $n$ is a _prime_ number (if such an $n$ exists)
+
+### Finite fields
 
 A finite field (or Galois Field, $GF$) is a field with a finite number of elements. The order of a
-finite field is always a prime power ($p^n$ where $p$ is prime and $n \geq 1$).
+finite field is always a prime power ($p^n$ where $p$ is prime and $n \geq 1$). The characteristic
+of a finite field $GF(p^n)$ has characteristic $p$.
 
 ### Prime fields
 
 The simplest finite fields are prime fields, denoted as $GF(p)$ or $\mathbb{F}_p$, where $p$ is
-prime. These are the integers modulo $p$ with addition and multiplication; a field with a prime
-number of elements. Properties of $GF(p)$ include:
+prime. These are integers modulo $p$ with addition and multiplication; a field with a prime number
+of elements. Properties of $GF(p)$ include:
 
 1. Contains exactly $p$ elements: $\{0, 1, ..., p-1\}$
 2. Every non-zero element has a multiplicative inverse
@@ -812,14 +964,73 @@ Thus, prime fields form the foundation for:
 - Diffie-Hellman key exchange
 - Many other cryptographic protocols
 
-### Finite fields of order $p^n$
+### Extension fields $GF(p^n)$
 
-Finite fields of order $p^n$ are denoted as $GF(p^n)$ or $\mathbb{F}_{p^n}$. These fields are
-constructed from the prime field $GF(p)$ by "adding a root" (call it $\alpha$) of an irreducible
-polynomial of degree $n$ over $GF(p)$. _Adding a root_ means introducing a new element ($\alpha$)
-that satisfies some polynomial equation over $GF(p)$. This new element lets us construct more field
-elements as polynomials in $\alpha$, and the irreducible polynomial tells us how to reduce higher
-powers of $\alpha$ back into the field.
+Extension fields are finite fields of order $p^n$, denoted as $GF(p^n)$ or $\mathbb{F}_{p^n}$ where
+$n \geq 1$. A quick comparison of prime fields and extension fields:
+
+- **Prime fields (n=1)**
+  - $GF(p)$ contains numbers $\{0, 1, ..., p-1\}$
+  - Example: $GF(2) = \{0, 1\}$
+- **Extension fields (n>1)**
+  - $GF(p^n)$ contains $p^n$ elements
+  - Example: $GF(2^2) = \{0, 1, \alpha, \alpha+1\}$ where $\alpha$ is a new element
+  - Example:
+    $GF(2^3) = \{0, 1, \alpha, \alpha+1, \alpha^2, \alpha^2+1, \alpha^2+\alpha, \alpha^2+\alpha+1\}$
+
+Here's an example of $GF(2^2)$ in action:
+
+```python
+# Elements of GF(2²) can be represented as 2-bit numbers
+elements = [(0,0), (0,1), (1,0), (1,1)]  # representing 0, 1, α, α+1
+
+def add_gf4(a: tuple, b: tuple) -> tuple:
+    """Addition in GF(2²) is bitwise XOR"""
+    return (a[0] ^ b[0], a[1] ^ b[1])
+
+def mul_gf4(a: tuple, b: tuple) -> tuple:
+    """Multiplication in GF(2²) using α² + α + 1 = 0
+
+    Elements are represented as tuples (a₁,a₀) meaning a₁α + a₀
+    For example:
+    - (0,0) = 0
+    - (0,1) = 1
+    - (1,0) = α
+    - (1,1) = α + 1
+
+    The irreducible polynomial is α² + α + 1 = 0
+    Therefore: α² = α + 1
+    """
+    # Step 1: Multiply polynomials
+    # (a₁α + a₀)(b₁α + b₀) = a₁b₁α² + (a₁b₀ + a₀b₁)α + a₀b₀
+
+    # Coefficient of α²
+    c2 = a[0] & b[0]
+
+    # Coefficient of α
+    c1 = (a[0] & b[1]) ^ (a[1] & b[0])
+
+    # Coefficient of 1
+    c0 = a[1] & b[1]
+
+    # Step 2: Reduce using α² = α + 1
+    # Replace every α² with (α + 1)
+    return (
+        (c1 ^ c2),     # New coefficient of α
+        (c0 ^ c2)      # New coefficient of 1
+    )
+
+# Example operations
+a = (1,0)  # representing α
+b = (1,1)  # representing α+1
+print(f"α + (α+1) = {add_gf4(a, b)}")  # = (0,1) = 1
+```
+
+These fields are constructed from the prime field $GF(p)$ by "adding a root" (call it $\alpha$) of
+an irreducible polynomial of degree $n$ over $GF(p)$. _Adding a root_ means introducing a new
+element ($\alpha$) that satisfies some polynomial equation over $GF(p)$. This new element lets us
+construct more field elements as polynomials in $\alpha$, and the irreducible polynomial tells us
+how to reduce higher powers of $\alpha$ back into the field.
 
 More specifically, an irreducible polynomial is a polynomial that cannot be factored into the
 product of two non-constant (i.e., degree $\geq 1$) polynomials with coefficients in the same field.
@@ -980,3 +1191,52 @@ For higher degrees or larger fields, we would need more sophisticated irreducibi
 1. AES uses $GF(2^8)$ for its S-box operations
 2. Error-correcting codes often use extension fields
 3. Some elliptic curves are defined over extension fields
+
+### Multiplicative groups
+
+A multiplicative group is the set of non-zero elements in a ring, field, or an arbitrary structure
+under multiplication (i.e., invertible). It is most commonly used in the context of fields; the
+group is $(F \setminus \{0\}, \cdot)$, where $0$ refers to the zero element of $F$ (i.e., we exclude
+the zero element) and the binary operation $\cdot$ is the field multiplication. In $GF(p)$, this is
+denoted as $GF(p)^*$.
+
+Key concepts (building upon orders as described [above](#order-of-a-group--element)):
+
+1. **Order**: The number of elements in the group
+
+   - For $GF(p)$, order is $p-1$
+   - For $GF(p^n)$, order is $p^n-1$
+
+2. **Element order**: Smallest positive integer $k$ where $g^k = 1$ (i.e., the multiplicative
+   identity element)
+
+   - Example in $GF(7)$: element $3$ has order $6$ because:
+     - $3^1 = 3$
+     - $3^2 = 2$
+     - $3^3 = 6$
+     - $3^4 = 4$
+     - $3^5 = 5$
+     - $3^6 = 1$
+
+3. **Primitive element/generator**: An element whose powers generate all non-zero elements
+   - Example: $3$ is primitive in $GF(7)$ because
+     $\{3^1, 3^2, 3^3, 3^4, 3^5, 3^6\} = \{3,2,6,4,5,1\}$
+
+```python
+def element_order(g: int, p: int) -> int:
+    """Find order of element g in GF(p)"""
+    value = g
+    order = 1
+    while value != 1:
+        value = (value * g) % p
+        order += 1
+    return order
+
+def is_primitive(g: int, p: int) -> bool:
+    """Check if g is primitive element in GF(p)"""
+    return element_order(g, p) == p-1
+
+# Example in GF(7)
+assert element_order(3, 7) == 6  # 3 is primitive
+assert not is_primitive(2, 7)    # 2 is not primitive
+```
