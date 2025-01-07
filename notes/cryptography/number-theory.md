@@ -23,14 +23,24 @@ Special types of numbers:
 
 ### Properties
 
+- **Closure**: the result of an operation on two numbers in a set remains in that set, if
+  $a, b \in S$ then $a + b \in S$ and $a \times b \in S$
 - **Commutative**: order in which two numbers are added or multiplied does not affect the result,
-  $a + b = b + a$
+  $a + b = b + a$ and $a \times b = b \times a$
 - **Associative**: when three or more numbers are added or multiplied, the grouping of the numbers
-  (i.e., how the numbers are associated) does not change the sum or product,
-  $(a + b) + c = a + (b + c)$
-- **Distributive**: involves two operations, multiplication _and_ addition or subtraction, such that
-  a number multiplied by the sum of two others can be broken down into individual multiplications
-  added together, $a \times (b + c) = a \times b + a \times c$
+  does not change the result, $(a + b) + c = a + (b + c)$ and
+  $(a \times b) \times c = a \times (b \times c)$
+- **Distributive**: multiplication over addition, $a \times (b + c) = a \times b + a \times c$
+- **Identity**: there exist elements that don't change a number when combined with it
+  - Additive identity: $a + 0 = a$
+  - Multiplicative identity: $a \times 1 = a$
+- **Inverse**: for each number, there exists another number that combines with it to give the
+  identity
+  - Additive inverse: $a + (-a) = 0$
+  - Multiplicative inverse: $a \times a^{-1} = 1$ (when $a \neq 0$)
+
+These properties are fundamental to understanding groups, rings, and fields, as different algebraic
+structures require different combinations of these properties.
 
 ### Operations
 
@@ -157,7 +167,7 @@ Here are some examples for $A = \{1, 2, 3\}$ and $B = \{2, 3, 4\}$ in $U = \{1, 
 
 ## Relations
 
-A relation denotes some kind of relationship between two objects in a set. A relation $R$ from
+A relation denotes some kind of relationship between two _elements_ in a set. A relation $R$ from
 domain $A$ to codomain $B$ is a set of ordered pairs $(a, b)$ where $a$ is from the domain and $b$
 is from the codomain. That is, it's a subset of the Cartesian product $A \times B$. Often, the
 domain and codomain are the same set, $A = B$.
@@ -372,8 +382,9 @@ Namely, groups are the most basic set, and fields are the most restrictive.
 
 ### Groups
 
-A group is a set $G$ with an arbitrary binary operation $\cdot$ (typically $+$ or $\times$) that
-satisfies—i.e., $(G, \cdot)$ is a group. The axioms are:
+A group is a pair containing a set $G$ with an arbitrary binary operation $\cdot$ (typically $+$ or
+$\times$) that satisfies—i.e., $(G, \cdot)$ is a group. In other words, it's a set _with_ an
+operation that satisfies the following axioms:
 
 - **Closure**: for all $a, b \in G$, $a \cdot b \in G$; i.e., the result of the operation is in the
   set
@@ -496,6 +507,134 @@ Note that:
 - The identity element always has order 1
 - If an element generates the entire group, its order equals the group's order
 
+#### Homomorphisms
+
+A group homomorphism is a mapping $h : G \to H$ between two groups, from $(G, *)$ to $(H, \cdot)$,
+that preserves the group operation. That is, for all $u, v \in G$, $h(u * v) = h(u) \cdot h(v)$, so
+the group operation on the left side of the equation is that of $G$ and on the right side that of
+$H$. There are five properties of group homomorphisms:
+
+- **Monomorphism**: $h$ is injective (one-to-one)
+- **Epimorphism**: $h$ is surjective (onto)
+- **Isomorphism**: $h$ is bijective (one-to-one and onto)
+- **Endomorphism**: $h$ is a homomorphism from a group to itself; $h : G \to G$ (domain and codomain
+  are the same), but it is not necessarily bijective
+- **Automorphism**: $h$ is both an endomorphism and an isomorphism from a group to itself;
+  $h : G \to G$ (domain and codomain are the same), so it _is_ bijective
+
+> [!NOTE]
+>
+> A homomorphism is like a relation but for groups. Relations relates elements within/between sets
+> (and no requirement to preserve any structure), while homomorphisms relates groups while
+> preserving their structure.
+
+Here's an example of a homomorphism:
+
+```python
+# Example: Homomorphism from (Z,+) to (Z_2,×)
+def parity_homomorphism(n: int) -> int:
+    """Maps integers to {0,1} based on parity"""
+    return n % 2
+
+a, b = 3, 5
+# Left side: f(a + b)
+assert parity_homomorphism(a + b) == 1  # f(8) = 0
+# Right side: f(a) × f(b)
+assert (parity_homomorphism(a) * parity_homomorphism(b)) % 2 == 1  # (1 × 1) % 2 = 1
+# Verify they're equal
+assert parity_homomorphism(a + b) == (parity_homomorphism(a) * parity_homomorphism(b)) % 2
+
+# Example: Endomorphism vs Automorphism
+# Endomorphism example (not an automorphism)
+def double_map(n: int) -> int:
+    """Maps Z → Z by doubling
+    This is an endomorphism but not an automorphism
+    because it's not bijective (misses odd numbers)"""
+    return 2 * n
+
+# Automorphism example
+def negate_map(n: int) -> int:
+    """Maps Z → Z by negating
+    This is an automorphism because it's bijective"""
+    return -n
+```
+
+Homomorphisms have the following properties. Let $e_H$ be the identity element of $H$, and $e_G$ be
+the identity element of $G$, for any $u \in G$:
+
+- Thus, $h(u) \cdot e_H = h(u) = h(u * e_G) = h(u) \cdot h(e_G)$
+  - $h(u) \cdot e_H = h(u)$ (since $e_H$ is the identity element in $H$)
+  - $h(u) = h(u * e_G)$ (since $e_G$ is the identity element in $G$)
+  - $h(u) = h(u) \cdot h(e_G)$ (since $h$ is a homomorphism)
+- Therefore, $e_H = h(e_G)$ (via cancellation or multiplying for the inverse of $h(u)$)
+- Similarly, $e_H = h(e_G) = h(u * u^{-1}) = h(u) * h(u^{-1})$
+  - $e_H = h(e_G)$ (from above)
+  - $e_H = h(u * u^{-1})$ (since $u * u^{-1} = e_G$)
+  - $e_H = h(u) * h(u^{-1})$ (since $h$ is a homomorphism)
+- Therefore, $h(u^{-1}) = h(u)^{-1}$
+
+So, our two properties are:
+
+1. $e_H = h(e_G)$
+2. $h(u^{-1}) = h(u)^{-1}$
+
+We can take our example from above and verify these properties:
+
+```python
+def parity_homomorphism(n: int) -> int:
+    """Maps integers to {0,1} based on parity"""
+    return n % 2
+
+# Identity property: h(e_G) = e_H
+# In (Z,+), e_G = 0
+# In (Z_2,×), e_H = 1
+assert parity_homomorphism(0) == 1  # h(e_G) = e_H
+
+# Inverse property: h(-n) = h(n)^(-1)
+n = 3
+assert parity_homomorphism(-n) == parity_homomorphism(n)  # In Z_2, 1 is its own inverse
+```
+
+#### Kernel and image
+
+The kernel of a homomorphism $h : G \to H$ is the set of elements in $G$ that map to the identity
+element in $H$, denoted as $\ker(h) := \{ u \in G : h(u) = e_H \}$. The image of a homomorphism
+$h : G \to H$ is the set of elements in $H$ that are the result of applying the homomorphism to some
+element in $G$, denoted as $\text{im}(h) \colonequals h(G) \equiv \{ h(u) : u \in G \}$.
+
+- Note: $\colonequals$ (colon equals) is used for definitions and assignments, and $\equiv$
+  (equivalent) is used for logical equivalence or identical equality.
+
+For example, in the homomorphism from the integers under addition to the integers modulo 2 under
+multiplication:
+
+```python
+def parity_homomorphism(n: int) -> int:
+    """Maps integers to {0,1} based on parity"""
+    return n % 2
+
+# Kernel: elements that map to identity (0 in Z_2)
+# These are all even integers {..., -2, 0, 2, 4, ...}
+assert parity_homomorphism(0) == 0
+assert parity_homomorphism(2) == 0
+assert parity_homomorphism(4) == 0
+
+# Image: all possible outputs
+# In this case, {0, 1}
+seen_outputs = {parity_homomorphism(n) for n in range(5)}
+assert seen_outputs == {0, 1}  # Complete image of Z_2
+
+# Verify kernel maps to identity
+def is_in_kernel(n: int) -> bool:
+    """Check if n is in kernel (maps to identity)"""
+    return parity_homomorphism(n) == 0
+
+assert is_in_kernel(0)   # True (even)
+assert is_in_kernel(2)   # True (even)
+assert not is_in_kernel(1)  # False (odd)
+assert not is_in_kernel(3)  # False (odd)
+```
+
 ### Rings
 
 A ring is a set of elements with _two_ binary operations. They are similar to groups but have two
@@ -607,3 +746,237 @@ Common examples of fields:
 - Real numbers ($\mathbb{R}$)
 - Complex numbers ($\mathbb{C}$)
 - Rational numbers ($\mathbb{Q}$)
+
+## Finite fields
+
+A finite field (or Galois Field, $GF$) is a field with a finite number of elements. The order of a
+finite field is always a prime power ($p^n$ where $p$ is prime and $n \geq 1$).
+
+### Prime fields
+
+The simplest finite fields are prime fields, denoted as $GF(p)$ or $\mathbb{F}_p$, where $p$ is
+prime. These are the integers modulo $p$ with addition and multiplication; a field with a prime
+number of elements. Properties of $GF(p)$ include:
+
+1. Contains exactly $p$ elements: $\{0, 1, ..., p-1\}$
+2. Every non-zero element has a multiplicative inverse
+3. Addition and multiplication are closed (i.e., closure) and associative
+4. Both operations are commutative
+5. Multiplication distributes over addition (i.e., distributing/factoring)
+
+Here's an example of $GF(5)$:
+
+```python
+def mod_add(a: int, b: int, p: int) -> int:
+    """Addition in GF(p)"""
+    return (a + b) % p
+
+def mod_mul(a: int, b: int, p: int) -> int:
+    """Multiplication in GF(p)"""
+    return (a * b) % p
+
+def mod_inv(a: int, p: int) -> int:
+    """Find multiplicative inverse in GF(p) using extended Euclidean algorithm"""
+    if a == 0:
+        raise ValueError("Zero has no multiplicative inverse")
+
+    def extended_gcd(a: int, b: int) -> tuple[int, int, int]:
+        """Returns (gcd, x, y) where ax + by = gcd"""
+        if a == 0:
+            return b, 0, 1
+        gcd, x1, y1 = extended_gcd(b % a, a)
+        x = y1 - (b // a) * x1
+        y = x1
+        return gcd, x, y
+
+    _, x, _ = extended_gcd(a, p)
+    return x % p
+
+# Example operations in GF(5)
+p = 5
+assert mod_add(3, 4, p) == 2     # 3 + 4 ≡ 2 (mod 5)
+assert mod_mul(3, 4, p) == 2     # 3 * 4 ≡ 2 (mod 5)
+assert mod_mul(3, mod_inv(3, p), p) == 1  # 3 * 3^(-1) ≡ 1 (mod 5)
+```
+
+Prime fields are used in cryptography because they are simple and have well-understood properties:
+
+1. **Finite**: Operations wrap around, giving us a bounded space to work in
+2. **Structure**: Every non-zero element has a multiplicative inverse (crucial for division)
+3. **Security**: The discrete logarithm problem is hard in well-chosen prime fields
+4. **Efficiency**: Modular arithmetic can be implemented efficiently
+
+Thus, prime fields form the foundation for:
+
+- Elliptic curve cryptography (like secp256k1 used in Bitcoin)
+- Diffie-Hellman key exchange
+- Many other cryptographic protocols
+
+### Finite fields of order $p^n$
+
+Finite fields of order $p^n$ are denoted as $GF(p^n)$ or $\mathbb{F}_{p^n}$. These fields are
+constructed from the prime field $GF(p)$ by "adding a root" (call it $\alpha$) of an irreducible
+polynomial of degree $n$ over $GF(p)$. _Adding a root_ means introducing a new element ($\alpha$)
+that satisfies some polynomial equation over $GF(p)$. This new element lets us construct more field
+elements as polynomials in $\alpha$, and the irreducible polynomial tells us how to reduce higher
+powers of $\alpha$ back into the field.
+
+More specifically, an irreducible polynomial is a polynomial that cannot be factored into the
+product of two non-constant (i.e., degree $\geq 1$) polynomials with coefficients in the same field.
+A simple example:
+
+- $x^2 - 1$ _is_ reducible because it can be factored into $(x-1)(x+1)$, and both factors $1$ and
+  $-1$ are within the same field. That is, we can factor it into the product of two constant (i.e.,
+  degree zero) polynomials.
+- However, $x^2 + 1$ is irreducible over the _real_ numbers because it cannot be factored into
+  $(x-a)(x-b)$ for real numbers $a$ and $b$; it factors into $(x-i)(x+i)$ over the complex numbers.
+- Similarly, $x^2 - 2$ is irreducible over the _rational_ numbers because it cannot be factored into
+  $(x-a)(x-b)$ for rational numbers $a$ and $b$; it factors into $(x-\sqrt{2})(x+\sqrt{2})$ over the
+  _real_ numbers (which includes irrational numbers).
+
+#### Properties
+
+1. Contains $p^n$ elements
+2. Every non-zero element has a multiplicative inverse
+3. Addition and multiplication are closed and associative
+4. Both operations are commutative
+5. Multiplication distributes over addition
+
+#### Construction
+
+1. Start with a prime field $GF(p)$
+2. Find an irreducible polynomial of degree $n$ over $GF(p)$
+3. Elements are polynomials of degree $< n$ with coefficients in $GF(p)$
+
+Think about how we construct complex numbers from real numbers:
+
+1. We start with real numbers (like $GF(p)$)
+2. We add a "root" $i$ where $i^2 = -1$ (an irreducible polynomial $x^2 + 1 = 0$)
+3. This gives us new numbers of the form $a + bi$
+
+Example of $GF(2^3)$:
+
+```python
+# GF(2^3) constructed using irreducible polynomial x³ + x + 1
+# Elements are binary polynomials: a₂x² + a₁x + a₀
+# where aᵢ ∈ {0,1}
+def poly_add(a: list[int], b: list[int]) -> list[int]:
+    """Add polynomials in GF(2^n)"""
+    # XOR coefficients (addition mod 2)
+    return [x ^ y for x, y in zip(a, b)]
+
+def poly_mul(a: list[int], b: list[int], mod_poly: list[int]) -> list[int]:
+    """Multiply polynomials in GF(2^n) with reduction
+    mod_poly represents x³ + x + 1 as [1,0,1,1]"""
+    # Initialize result with zeros (degree 2n-2)
+    result = [0] * (len(a) + len(b) - 1)
+
+    # Multiply polynomials
+    for i in range(len(a)):
+        for j in range(len(b)):
+            result[i + j] ^= a[i] & b[j]  # XOR for addition in GF(2)
+
+    # Reduce modulo the irreducible polynomial
+    while len(result) > len(mod_poly) - 1:
+        if result[0] == 1:  # If leading coefficient is 1
+            # XOR with shifted modular polynomial
+            shift = len(result) - len(mod_poly)
+            for i in range(len(mod_poly)):
+                result[i + shift] ^= mod_poly[i]
+        result = result[1:]  # Remove leading coefficient
+
+    # Pad result to match field element size
+    while len(result) < len(mod_poly) - 1:
+        result.append(0)
+
+    return result
+
+# Example: GF(2³) with irreducible polynomial x³ + x + 1
+mod_poly = [1,0,1,1]  # x³ + x + 1
+
+# Elements of GF(2³)
+elements = [
+    [0,0,0],  # 0
+    [0,0,1],  # 1
+    [0,1,0],  # x
+    [0,1,1],  # x + 1
+    [1,0,0],  # x²
+    [1,0,1],  # x² + 1
+    [1,1,0],  # x² + x
+    [1,1,1]   # x² + x + 1
+]
+
+# Example operations
+a = [0,1,0]  # x
+b = [1,0,0]  # x²
+
+# Addition: x + x² = x² + x
+sum_result = poly_add(a, b)  # [1,1,0]
+assert sum_result == [1,1,0]
+
+# Multiplication: x × x² = x³ = x + 1 (using reduction)
+mul_result = poly_mul(a, b, mod_poly)  # [0,1,1]
+assert mul_result == [0,1,1]
+```
+
+Note: When we multiply elements, we reduce using the irreducible polynomial $x^3 + x + 1$. For
+example:
+
+- $x \times x^2 = x^3 = x + 1$ (because $x^3 + x + 1 = 0$ in the field)
+- $(x + 1) \times x = x^2 + x$
+
+#### Verifying irreducibility
+
+To verify that $x^3 + x + 1$ is irreducible over $GF(2)$, we can:
+
+1. Check that it has no roots in $GF(2)$
+2. Check that it's not divisible by any polynomial of degree 1
+
+```python
+def evaluate_poly(poly: list[int], x: int, p: int) -> int:
+    """Evaluate polynomial at x in GF(p)"""
+    result = 0
+    for coef in reversed(poly):  # Start from constant term
+        result = (result * x + coef) % p
+    return result
+
+def is_irreducible_degree3(poly: list[int]) -> bool:
+    """Check if polynomial of degree 3 is irreducible over GF(2)
+    poly is represented as [a₃,a₂,a₁,a₀] for a₃x³ + a₂x² + a₁x + a₀"""
+
+    # 1. Check for roots in GF(2)
+    # If f(0) = 0 or f(1) = 0, polynomial has a root
+    if evaluate_poly(poly, 0, 2) == 0 or evaluate_poly(poly, 1, 2) == 0:
+        return False
+
+    return True  # No roots found, must be irreducible
+
+# Verify x³ + x + 1 is irreducible
+mod_poly = [1,0,1,1]  # x³ + x + 1
+assert is_irreducible_degree3(mod_poly)
+
+# Example of reducible polynomial
+reducible = [1,0,1,0]  # x³ + x
+assert not is_irreducible_degree3(reducible)  # Because x is a factor
+
+# Let's see why x³ + x + 1 has no roots:
+print(f"f(0) = {evaluate_poly(mod_poly, 0, 2)}")  # = 1
+print(f"f(1) = {evaluate_poly(mod_poly, 1, 2)}")  # = 1
+# Since neither 0 nor 1 are roots, and these are all elements of GF(2),
+# x³ + x + 1 has no linear factors over GF(2)
+```
+
+Note: For a cubic polynomial over $GF(2)$, being irreducible is equivalent to having no roots in
+$GF(2)$. This is because:
+
+1. If it were reducible, it would have at least one linear factor $(x + \alpha)$
+2. That linear factor would give us a root $\alpha \in GF(2)$
+3. Therefore, no roots implies irreducible
+
+For higher degrees or larger fields, we would need more sophisticated irreducibility tests.
+
+#### Applications in cryptography
+
+1. AES uses $GF(2^8)$ for its S-box operations
+2. Error-correcting codes often use extension fields
+3. Some elliptic curves are defined over extension fields
