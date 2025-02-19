@@ -485,11 +485,11 @@ Note that cyclic groups can be finite or infinite. For example, the integers und
 infinite cyclic group, where the generator is $1$ (e.g., $1, 2, 3, 4, \ldots$) or its inverse $-1$
 (e.g., $\ldots,4, 3, 2, 1$).
 
-## Quadratic residues
+### Quadratic residues
 
 A number $a$ is a quadratic residue modulo $p$ if there exists an $x$ where $x^2 \equiv a \pmod{p}$.
-The Legendre symbol $(a \mid p)$ can be used for odd primes and integers and is defined as
-$a^{(p-1)/2} \pmod{p}$. The Legendre symbol is:
+The Legendre symbol $(a \mid p)$ can be used for odd primes and integers and is defined by Euler’s
+Criterion: $a^{(p-1)/2} \pmod{p} = \pm 1$. Thus, the Legendre symbol is:
 
 - $1$ if $a$ is a quadratic residue modulo $p$
 - $-1$ if $a$ is a quadratic non-residue
@@ -502,6 +502,26 @@ Its properties are:
 - Product of non-residue and residue is non-residue
 - For any integer $b$, $(\frac{a}{p}) (\frac{b}{p}) = (\frac{ab}{p})$
 - For any $r$ coprime to $p$, $(\frac{ar^2}{p}) = (\frac{a}{p})$
+
+An example for $p = 7$, hence, $(p-1)/2 = 3$, we can operate over the set $\{1,2,3,4,5,6\}$:
+
+- $1^3 \equiv 1 \equiv 1 \pmod{7}$, so $1$ is a quadratic _non-residue_
+- $2^3 \equiv 8 \equiv 1 \pmod{7}$, so $2$ is a quadratic _residue_
+- $3^3 \equiv 27 \equiv 6 \pmod{7}$, so $3$ is a quadratic _non-residue_
+- $4^3 \equiv 64 \equiv 1 \pmod{7}$, so $4$ is a quadratic _residue_
+- $5^3 \equiv 125 \equiv 6 \pmod{7}$, so $5$ is a quadratic _non-residue_
+- $6^3 \equiv 216 \equiv 1 \pmod{7}$, so $6$ is a quadratic _residue_
+
+So, ${2, 4, 6}$ are quadratic residues, but ${1, 3, 5}$ are not. The main callout here is that
+${1, 3, 5}$ equated to $6$, which can be interpreted as $-1$.
+
+> [!NOTE]
+>
+> The value $-1$ is just another way of writing the equivalence class that is $6$ in the standard
+> representation of the integers modulo $7$: ${0, \ldots, 6}$. It's the equivalence class. That is,
+> for $6 \equiv 6 + 7k$ (for any integer $k$).
+
+Or, algorithmically:
 
 ```python
 def legendre_symbol(a: int, p: int) -> int:
@@ -679,11 +699,10 @@ assert parity_homomorphism(-n) == parity_homomorphism(n)  # In Z_2, 1 is its own
 The **kernel** of a homomorphism $h : G \to H$ is the set of elements in $G$ that map to the
 identity element in $H$, denoted as $\ker(h) := \{ u \in G : h(u) = e_H \}$. The **image** of a
 homomorphism $h : G \to H$ is the set of elements in $H$ that are the result of applying the
-homomorphism to some element in $G$, denoted as
-$\text{im}(h) \colonequals h(G) \equiv \{ h(u) : u \in G \}$.
+homomorphism to some element in $G$, denoted as $\text{im}(h) := h(G) \equiv \{ h(u) : u \in G \}$.
 
-- Note: $\colonequals$ (colon equals) is used for definitions and assignments, and $\equiv$
-  (equivalent) is used for logical equivalence or identical equality.
+- Note: $:=$ (colon equals) is used for definitions and assignments, and $\equiv$ (equivalent) is
+  used for logical equivalence or identical equality.
 
 Let's look at a homomorphism $h$ from $(\mathbb{Z},+)$ to $(\mathbb{Z}_2,\times)$:
 
